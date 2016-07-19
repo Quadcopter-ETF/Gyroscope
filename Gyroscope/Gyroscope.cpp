@@ -31,7 +31,7 @@ void Gyroscope::bootUp(){
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 	Wire.begin();
 	// comment the line bellow if Arduino DUE is used
-	// TWBR = 12; // 400kHz I2C clock (200kHz if CPU is 8MHz)
+	 //TWBR = 12; // 400kHz I2C clock (200kHz if CPU is 8MHz)
 #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
 	Fastwire::setup(400, true);
 #endif
@@ -69,7 +69,7 @@ void Gyroscope::bootUp(){
 			digitalWrite(RTD, HIGH);
 			delay(20);
 			digitalWrite(RTD, LOW);
-			delay(1000);
+			delay(50);
 		}
 		else if (state == 1) {
 			calibration();
@@ -77,7 +77,7 @@ void Gyroscope::bootUp(){
 			digitalWrite(RTD, HIGH);
 			delay(20);
 			digitalWrite(RTD, LOW);
-			delay(1000);
+			delay(50);
 		}
 
 		else if (state == 2) {
@@ -88,7 +88,7 @@ void Gyroscope::bootUp(){
 				digitalWrite(RTD, LOW);
 				delay(20);
 			}
-			delay(1000);
+			delay(50);
 			break;
 		}
 	}
@@ -246,7 +246,7 @@ void Gyroscope::readEuler(){
 	Serial.println(euler[2] * 180 / M_PI);
 }
 
-void Gyroscope::readYPR(){
+void Gyroscope::readYPR(float& yaw2,float& pitch2, float& roll2){
 	gyro.dmpGetQuaternion(&q, fifoBuffer);
 	gyro.dmpGetGravity(&gravity, &q);
 	gyro.dmpGetYawPitchRoll(ypr, &q, &gravity);
@@ -257,19 +257,17 @@ void Gyroscope::readYPR(){
 	yawStats.input(yawFilter.output());
 	pitchStats.input(pitchFilter.output());
 	rollStats.input(rollFilter.output());
-
-	/*Serial.print("ypr\t");
-	Serial.print(yawStats.mean());
-	Serial.print("\t");
-	Serial.print(pitchStats.mean());
-	Serial.print("\t");
-	Serial.println(rollStats.mean());*/
-	Serial.print("ypr\t");
-	Serial.print(yawFilter.output());
-	Serial.print("\t");
-	Serial.print(pitchFilter.output());
-	Serial.print("\t");
-	Serial.println(rollFilter.output());
+// zamenjeno pitch i roll zbog orijentacije senzora
+	//Serial.print("ypr\t");
+	//Serial.print(yawStats.mean());
+	//Serial.print("\t");
+	//Serial.print(rollStats.mean());
+	//Serial.print("\t");
+	//Serial.println(pitchStats.mean());
+	yaw2=yawStats.mean();
+	roll2=pitchStats.mean();
+	pitch2=rollStats.mean();
+	
 }
 
 void Gyroscope::checkFIFOOverFlow(){

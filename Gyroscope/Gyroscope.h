@@ -18,7 +18,7 @@
 // -------------------------------------------------------------------
 
 class Gyroscope{
-private:
+public:
 	friend void GyroRead(Gyroscope *g, volatile bool& mpuInterrupt);
 	// ------------------------Config for Calibration-----------------------------
 	int16_t ax, ay, az, gx, gy, gz;
@@ -46,7 +46,7 @@ private:
 	uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
 	uint16_t fifoCount;     // count of all bytes currently in FIFO
 	uint8_t fifoBuffer[64]; // FIFO storage buffer
-	float filterFrequency = 5.0;
+	float filterFrequency = 75;
 	float windowLength = 20.0 / filterFrequency;
 	// ---------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ private:
 	RunningStatistics rollStats;
 	// ---------------------------------------------------------------------------
 
-public:
+//public:
 	// ------------------------Class variables------------------------------------
 	MPU6050 gyro;
 	uint8_t RTD; // RTD represents Ready-To-Drive buzzer/LED which signals whether the MPU6050 is calibrated and safe to use
@@ -78,13 +78,13 @@ public:
 	void bootUp(); // boot-up routine
 	void readWorldAccel(); // this method returns World Acceleration values
 	void readAccel(); // this method returns Acceleration values
-	void readYPR(); // this method returns Yaw, Pitch, Roll values
+	void readYPR(float&,float&,float&); // this method returns Yaw, Pitch, Roll values
 	void readEuler(); // this method returns Euler values
 	void checkFIFOOverFlow();
 	// ---------------------------------------------------------------------------
 };
 
-inline void GyroRead(Gyroscope *g, volatile bool& mpuInterrupt){
+inline void GyroRead(Gyroscope *g, volatile bool& mpuInterrupt, float& yaw1,float& pitch1,float& roll1){
 	mpuInterrupt = false;
 	g->mpuIntStatus = g->gyro.getIntStatus();
 	g->mpuIntStatus = true;
@@ -93,6 +93,9 @@ inline void GyroRead(Gyroscope *g, volatile bool& mpuInterrupt){
 	g->gyro.getFIFOBytes(g->fifoBuffer, g->packetSize);
 	g->gyro.resetFIFO();
 	g->fifoCount -= g->packetSize;
-	g->readYPR();
+	g->readYPR(yaw1,pitch1,roll1);
+	//yaw=yawStats.mean();
+	//pitch=pitchStats.mean();
+	//roll=rollStats.mean();
 }
 #endif
